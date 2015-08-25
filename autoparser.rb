@@ -1,6 +1,7 @@
 require 'open-uri'
 require 'pry'
 require 'nokogiri'
+require 'json'
 fname = "marks_json.txt"
 
 somefile = File.open(fname, "w")
@@ -31,6 +32,6 @@ hash.each do |key, value|
 	end
 	resulted_hash["#{key}"] =  models_array.uniq
 end
-somefile.puts resulted_hash
+somefile.puts resulted_hash.to_json
 puts "Parsed for #{(Time.now - start_time).round} seconds"
 somefile.close
