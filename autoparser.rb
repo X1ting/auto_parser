@@ -7,12 +7,10 @@ somefile = File.open(fname, "w")
 url_start = 'http://auto.ru'
 html = open(url_start)
 doc = Nokogiri::HTML(html)
-# binding.pry
 start_time = Time.now
 temp_arr = []
 hash = {}
 doc.css('.marks-col-item').each do |marka|
-	# binding.pry
 	key = marka.children.first.attributes["name"].value
 	value = marka.children.first["href"]
 	hash["#{key}"] = value
