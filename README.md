@@ -9,6 +9,6 @@ when done, see marks_json.txt file
 
 if anything going wrong try install gems: 
 
-open-uri
-nokogiri
-json
+    open-uri
+    nokogiri
+    json
