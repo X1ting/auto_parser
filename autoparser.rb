@@ -4,7 +4,7 @@ require 'json'
 
 class AutoParser
   attr_reader :filename, :url, :results, :start_time,
-    :marks, :models
+    :marks_data, :models
 
   def initialize(args = {})
     @filename = args[:filename]
@@ -20,38 +20,27 @@ class AutoParser
 
   private
   def parse_marks
-    doc = Nokogiri::HTML(open(url))
+    doc = nokogiri_object
     @start_time = Time.now
 
-    {}.tap do |hash|
-      doc.css('.mmm__item').each do |marka|
-        key = marka.children.first.children.first.text
-        value = marka.children.first["href"]
-
-        hash[key] = value
-      end
-
-      @marks = hash
+    @marks_data = doc.css('.mmm__item').inject({}) do |hash, marka|
+      hash[marka.children.first.children.first.text] = marka.children.first['href']; hash
     end
 
-    puts "Count of model = #{marks.count}"
+    puts "Count of model = #{marks_data.count}"
   end
 
   def parse_models
-    marks.each_with_index do |mark, index|
+    marks_data.to_enum.with_index(1).each do |mark, index|
       key, value = mark
-      index += 1
-      puts "Parsed #{index} model, called #{key.capitalize}, remaining #{marks.count - index} models"
-      @url = "https:#{value}"
-      doc = Nokogiri::HTML(open(url))
+      doc = nokogiri_object("https:#{value}")
+      puts "Parsed #{index} model, called #{key.capitalize}, remaining #{marks_data.count - index} models"
 
-      [].tap do |models|
-        doc.css('.mmm__item').each do |model|
-          models << model.children.first.text
-        end
-
-        @results[key] = models
+      models = doc.css('.mmm__item').inject([]) do |array, model|
+        array << model.children.first.text; array
       end
+
+      @results[key] = models
     end
 
     puts "Parsed for #{(Time.now - start_time).round} seconds"
@@ -61,6 +50,10 @@ class AutoParser
     file_descriptor = File.open(filename, 'w')
     file_descriptor.puts results.to_json
     file_descriptor.close
+  end
+
+  def nokogiri_object(url = @url)
+    Nokogiri::HTML(open(url))
   end
 end
 
